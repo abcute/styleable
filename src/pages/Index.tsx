@@ -13,6 +13,7 @@ import PaymentModal from "@/components/PaymentModal";
 import Navbar from "@/components/Navbar";
 import { ArrowRight, FileText, Sparkles, Edit3, CreditCard } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { analyzeStyle } from "@/utils/analysisUtils";
 
 const Index = () => {
   const { toast } = useToast();
@@ -26,7 +27,7 @@ const Index = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   
-  const analyzeStyle = async () => {
+  const handleAnalyzeStyle = async () => {
     if (!originalText.trim()) {
       toast({
         title: "无法分析",
@@ -38,26 +39,10 @@ const Index = () => {
     
     setIsLoading(true);
     try {
-      // 这里会调用API提取文章风格
-      // 模拟API调用
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // 调用分析函数
+      const analysisResult = await analyzeStyle(originalText);
       
-      // 模拟返回的风格分析结果
-      const mockAnalysis = {
-        style_summary: "文艺清新描述型散文",
-        language: {
-          sentence_pattern: ["短句与长句交替", "排比句"],
-          word_choice: {
-            formality_level: "3",
-            preferred_words: ["悠然", "恍惚", "微澜"],
-            avoided_words: ["严肃术语", "强烈情感词"]
-          },
-          rhetoric: ["拟人", "比喻", "排比"]
-        },
-        // 其他风格分析内容...
-      };
-      
-      setStyleAnalysis(mockAnalysis);
+      setStyleAnalysis(analysisResult);
       setStep(2);
       toast({
         title: "分析完成",
@@ -179,7 +164,7 @@ const Index = () => {
             <OriginalTextInput 
               value={originalText} 
               onChange={setOriginalText} 
-              onAnalyze={analyzeStyle}
+              onAnalyze={handleAnalyzeStyle}
               isLoading={isLoading}
             />
           )}
