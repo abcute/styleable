@@ -13,7 +13,7 @@ import PaymentModal from "@/components/PaymentModal";
 import Navbar from "@/components/Navbar";
 import { ArrowRight, FileText, Sparkles, Edit3, CreditCard } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { analyzeStyle } from "@/utils/analysisUtils";
+import { analyzeStyle, generateMimicText, humanizeText } from "@/utils/analysisUtils";
 
 const Index = () => {
   const { toast } = useToast();
@@ -60,7 +60,7 @@ const Index = () => {
     }
   };
 
-  const generateMimicText = async () => {
+  const generateMimicTextHandler = async () => {
     if (!styleAnalysis || !topicKeywords.trim()) {
       toast({
         title: "无法生成",
@@ -72,18 +72,14 @@ const Index = () => {
     
     setIsLoading(true);
     try {
-      // 这里会调用API生成仿写文章
-      // 模拟API调用
-      await new Promise(resolve => setTimeout(resolve, 3000));
+      // 调用仿写生成函数
+      const generatedText = await generateMimicText(styleAnalysis, topicKeywords);
       
-      // 模拟生成的文章
-      const mockMimickedText = `在这座僻静的古镇深处，有一间木工坊，门扉斑驳，窗棂透着岁月的气息。工坊主人是个年过半百的匠人，他的指尖刻满了木屑和年轮...`;
-      
-      setMimickedText(mockMimickedText);
+      setMimickedText(generatedText);
       setStep(3);
       toast({
         title: "生成完成",
-        description: "已根据提供的风格生成文章",
+        description: "已根据提供的风格和主题生成文章",
       });
     } catch (error) {
       toast({
@@ -97,7 +93,7 @@ const Index = () => {
     }
   };
 
-  const humanizeText = async () => {
+  const humanizeTextHandler = async () => {
     if (!mimickedText) {
       toast({
         title: "无法处理",
@@ -109,18 +105,16 @@ const Index = () => {
     
     setIsLoading(true);
     try {
-      // 这里会调用API让文章更有"人味"
-      // 模拟API调用
-      await new Promise(resolve => setTimeout(resolve, 2500));
+      // 调用人味化处理函数
+      const processedText = await humanizeText(mimickedText);
       
-      // 模拟人味化后的文章
-      const mockHumanizedText = `我走进古镇那间木工坊时，手指无意识地摸了摸额头的汗珠——夏日的午后总是这样闷热。工坊里有股特别的味道，木屑混着些许霉味，又带点松油的清香，说不上多好闻，却让人莫名安心。
-
-匠人头也没抬，只顾着摩挲手中那件看起来已有些年头的木器。我注意到他的手指上有一道新鲜的小伤口，应该是不小心划到的。站了半天腿有点酸，我挪了挪位置，地板发出轻微的吱呀声...`;
-      
-      setHumanizedText(mockHumanizedText);
+      setHumanizedText(processedText);
       setShowPaymentModal(true);
       setStep(4);
+      toast({
+        title: "处理完成",
+        description: "文章已经过人味化处理",
+      });
     } catch (error) {
       toast({
         title: "处理失败",
@@ -181,7 +175,7 @@ const Index = () => {
             <TopicInput 
               value={topicKeywords}
               onChange={setTopicKeywords}
-              onGenerate={generateMimicText}
+              onGenerate={generateMimicTextHandler}
               isLoading={isLoading}
             />
           )}
@@ -190,7 +184,7 @@ const Index = () => {
             <MimicPreview
               text={mimickedText}
               collapsed={step > 3}
-              onHumanize={humanizeText}
+              onHumanize={humanizeTextHandler}
               onBack={() => step === 3 && setStep(2)}
               isLoading={isLoading}
             />
