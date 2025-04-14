@@ -1,4 +1,3 @@
-
 // 风格分析提示词模板
 const STYLE_ANALYSIS_PROMPT = `# 文章风格提取提示词模板 v1.0
 请输入您想要分析的文本段落。我将对其进行深度风格解析，并以结构化格式输出分析结果。
@@ -85,7 +84,7 @@ async function callDeepseekAPI(prompt: string, systemPrompt?: string): Promise<s
         'Authorization': `Bearer ${DEEPSEEK_API_KEY}`
       },
       body: JSON.stringify({
-        model: 'deepseek-v3',
+        model: 'deepseek-chat',
         messages: [
           ...(systemPrompt ? [{ role: 'system', content: systemPrompt }] : []),
           { role: 'user', content: prompt }
@@ -253,7 +252,7 @@ export const HUMANIZE_TEXT_PROMPT = `# 人味改写提示词模板 v1.0
 1. 加入身体层面的描述（不适感、微小细节、身体需求）
 2. 增加情绪波动和矛盾情绪
 3. 插入随机联想和琐事打断
-4. 使用口语化表达和不完整句
+4. 使用口语化表���和不完整句
 5. 打破流畅叙事，加入思维跳跃
 6. 减少华丽修辞，保留重复和赘述
 
