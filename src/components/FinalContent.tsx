@@ -1,8 +1,10 @@
 
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Lock } from "lucide-react";
+import { Lock, Copy, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useToast } from "@/hooks/use-toast";
+import { useState } from "react";
 
 interface FinalContentProps {
   text: string;
@@ -11,7 +13,33 @@ interface FinalContentProps {
 }
 
 const FinalContent = ({ text, isPaid, onOpenPayment }: FinalContentProps) => {
+  const { toast } = useToast();
+  const [isCopied, setIsCopied] = useState(false);
+
   const displayText = isPaid ? text : text.substring(0, 300) + "...";
+
+  const handleCopyText = async () => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setIsCopied(true);
+      toast({
+        title: "复制成功",
+        description: "全文已复制到剪贴板",
+        duration: 2000,
+      });
+
+      // Reset the copied state after 2 seconds
+      setTimeout(() => {
+        setIsCopied(false);
+      }, 2000);
+    } catch (err) {
+      toast({
+        title: "复制失败",
+        description: "无法复制文本，请重试",
+        variant: "destructive",
+      });
+    }
+  };
 
   return (
     <Card className="p-6">
@@ -39,7 +67,23 @@ const FinalContent = ({ text, isPaid, onOpenPayment }: FinalContentProps) => {
       
       {isPaid && (
         <div className="mt-6 flex justify-between">
-          <Button variant="outline">复制全文</Button>
+          <Button 
+            variant="outline" 
+            onClick={handleCopyText}
+            className="flex items-center gap-2"
+          >
+            {isCopied ? (
+              <>
+                <Check className="h-4 w-4 text-green-500" />
+                已复制
+              </>
+            ) : (
+              <>
+                <Copy className="h-4 w-4" />
+                复制全文
+              </>
+            )}
+          </Button>
           <Button variant="outline">下载 PDF</Button>
         </div>
       )}
