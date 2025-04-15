@@ -2,8 +2,10 @@
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ChevronDown, ChevronUp, ArrowLeft, ArrowRight, Loader2 } from "lucide-react";
+import { ChevronDown, ChevronUp, ArrowLeft, ArrowRight, Loader2, Copy, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useToast } from "@/hooks/use-toast";
+import { useLanguage } from "@/context/LanguageContext";
 
 interface MimicPreviewProps {
   text: string;
@@ -14,13 +16,36 @@ interface MimicPreviewProps {
 }
 
 const MimicPreview = ({ text, collapsed, onHumanize, onBack, isLoading }: MimicPreviewProps) => {
+  const { toast } = useToast();
+  const { t } = useLanguage();
   const [isExpanded, setIsExpanded] = useState(!collapsed);
+  const [isCopied, setIsCopied] = useState(false);
+
+  const handleCopyText = async () => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setIsCopied(true);
+      toast({
+        title: t("toast.copySuccess"),
+        duration: 2000,
+      });
+      
+      setTimeout(() => {
+        setIsCopied(false);
+      }, 2000);
+    } catch (err) {
+      toast({
+        title: t("toast.copyFail"),
+        variant: "destructive",
+      });
+    }
+  };
 
   return (
-    <Card className={cn("p-6 mb-6", collapsed ? "bg-gray-50" : "")}>
+    <Card className={cn("p-6 mb-6", collapsed ? "bg-gray-50 dark:bg-gray-800/20" : "")}>
       <div className="flex justify-between items-center">
         <h2 className="text-xl font-semibold">
-          {collapsed ? "生成的仿写文章" : "步骤三：生成的仿写文章"}
+          {collapsed ? t("mimicPreview.title") : "步骤三：" + t("mimicPreview.title")}
         </h2>
         
         <Button 
@@ -32,12 +57,12 @@ const MimicPreview = ({ text, collapsed, onHumanize, onBack, isLoading }: MimicP
           {isExpanded ? (
             <>
               <ChevronUp className="h-4 w-4 mr-1" />
-              收起
+              {t("mimicPreview.collapse")}
             </>
           ) : (
             <>
               <ChevronDown className="h-4 w-4 mr-1" />
-              展开
+              {t("mimicPreview.expand")}
             </>
           )}
         </Button>
@@ -45,8 +70,28 @@ const MimicPreview = ({ text, collapsed, onHumanize, onBack, isLoading }: MimicP
       
       {isExpanded && (
         <>
-          <div className="mt-4 p-4 bg-gray-50 rounded-md whitespace-pre-line">
+          <div className="mt-4 p-4 bg-gray-50 dark:bg-gray-800/30 rounded-md whitespace-pre-line">
             {text}
+          </div>
+          
+          <div className="mt-4 flex">
+            <Button 
+              variant="outline" 
+              onClick={handleCopyText}
+              className="flex items-center gap-2"
+            >
+              {isCopied ? (
+                <>
+                  <Check className="h-4 w-4 text-green-500" />
+                  {t("finalContent.copied")}
+                </>
+              ) : (
+                <>
+                  <Copy className="h-4 w-4" />
+                  {t("finalContent.copyText")}
+                </>
+              )}
+            </Button>
           </div>
           
           {!collapsed && (
@@ -58,7 +103,7 @@ const MimicPreview = ({ text, collapsed, onHumanize, onBack, isLoading }: MimicP
                   className="flex items-center gap-2"
                 >
                   <ArrowLeft className="h-4 w-4" />
-                  返回修改主题
+                  {t("mimicPreview.back")}
                 </Button>
               )}
               
@@ -70,11 +115,11 @@ const MimicPreview = ({ text, collapsed, onHumanize, onBack, isLoading }: MimicP
                 {isLoading ? (
                   <>
                     <Loader2 className="h-4 w-4 animate-spin" />
-                    处理中...
+                    {t("mimicPreview.processing")}
                   </>
                 ) : (
                   <>
-                    增加"人味" 
+                    {t("mimicPreview.humanize")}
                     <ArrowRight className="h-4 w-4" />
                   </>
                 )}
