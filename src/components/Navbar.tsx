@@ -1,12 +1,14 @@
 
-import { BookOpen, FileText } from "lucide-react";
+import { BookOpen, FileText, LogOut, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import LanguageSwitcher from "./LanguageSwitcher";
 import { useLanguage } from "@/context/LanguageContext";
+import { useAuth } from "@/context/AuthContext";
 
 const Navbar = () => {
   const { t } = useLanguage();
+  const { user, isAuthenticated, logout } = useAuth();
   
   return (
     <header className="bg-white/50 backdrop-blur-md shadow-sm dark:bg-black/30">
@@ -26,8 +28,36 @@ const Navbar = () => {
           </nav>
           
           <LanguageSwitcher />
-          <Button variant="ghost" className="text-gray-600 dark:text-gray-300">{t("navbar.login")}</Button>
-          <Button className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700">{t("navbar.register")}</Button>
+          
+          {isAuthenticated ? (
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-gray-600 dark:text-gray-300 hidden md:inline-block">
+                {user?.name}
+              </span>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="text-gray-600 dark:text-gray-300"
+                onClick={logout}
+              >
+                <LogOut className="h-4 w-4 mr-1" />
+                {t("navbar.logout")}
+              </Button>
+            </div>
+          ) : (
+            <>
+              <Link to="/login">
+                <Button variant="ghost" className="text-gray-600 dark:text-gray-300">
+                  {t("navbar.login")}
+                </Button>
+              </Link>
+              <Link to="/register">
+                <Button className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700">
+                  {t("navbar.register")}
+                </Button>
+              </Link>
+            </>
+          )}
         </div>
       </div>
     </header>

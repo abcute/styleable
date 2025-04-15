@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { ChevronDown, ChevronUp, ArrowLeft } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useLanguage } from "@/context/LanguageContext";
 
 interface StyleAnalysisProps {
   analysis: any;
@@ -14,12 +15,13 @@ interface StyleAnalysisProps {
 
 const StyleAnalysis = ({ analysis, collapsed, onBack }: StyleAnalysisProps) => {
   const [isExpanded, setIsExpanded] = useState(!collapsed);
+  const { t } = useLanguage();
 
   return (
     <Card className={cn("p-6 mb-6", collapsed ? "bg-gray-50" : "")}>
       <div className="flex justify-between items-center">
         <h2 className="text-xl font-semibold">
-          {collapsed ? "风格分析结果" : "步骤二：风格分析结果"}
+          {collapsed ? t("styleAnalysis.title") : "步骤二：" + t("styleAnalysis.title")}
         </h2>
         
         <Button 
@@ -31,12 +33,12 @@ const StyleAnalysis = ({ analysis, collapsed, onBack }: StyleAnalysisProps) => {
           {isExpanded ? (
             <>
               <ChevronUp className="h-4 w-4 mr-1" />
-              收起
+              {t("styleAnalysis.collapse")}
             </>
           ) : (
             <>
               <ChevronDown className="h-4 w-4 mr-1" />
-              展开
+              {t("styleAnalysis.expand")}
             </>
           )}
         </Button>
@@ -45,16 +47,16 @@ const StyleAnalysis = ({ analysis, collapsed, onBack }: StyleAnalysisProps) => {
       {isExpanded && (
         <>
           <div className="mt-4 p-4 bg-indigo-50 rounded-md">
-            <h3 className="font-medium mb-2">风格概述</h3>
+            <h3 className="font-medium mb-2">{t("styleAnalysis.overview")}</h3>
             <p>{analysis.style_summary}</p>
           </div>
           
           <Tabs defaultValue="language" className="mt-6">
             <TabsList className="grid grid-cols-4">
-              <TabsTrigger value="language">语言特征</TabsTrigger>
-              <TabsTrigger value="structure">结构特征</TabsTrigger>
-              <TabsTrigger value="narrative">叙事特征</TabsTrigger>
-              <TabsTrigger value="more">更多特征</TabsTrigger>
+              <TabsTrigger value="language">{t("styleAnalysis.language")}</TabsTrigger>
+              <TabsTrigger value="structure">{t("styleAnalysis.structure")}</TabsTrigger>
+              <TabsTrigger value="narrative">{t("styleAnalysis.narrative")}</TabsTrigger>
+              <TabsTrigger value="more">{t("styleAnalysis.more")}</TabsTrigger>
             </TabsList>
             
             <TabsContent value="language" className="mt-4">
@@ -290,7 +292,7 @@ const StyleAnalysis = ({ analysis, collapsed, onBack }: StyleAnalysisProps) => {
                 className="flex items-center gap-2"
               >
                 <ArrowLeft className="h-4 w-4" />
-                返回修改原文
+                {t("styleAnalysis.back")}
               </Button>
             </div>
           )}

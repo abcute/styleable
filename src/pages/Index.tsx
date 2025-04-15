@@ -14,16 +14,20 @@ import { ArrowRight, FileText, Sparkles, Edit3, CreditCard } from "lucide-react"
 import { useToast } from "@/hooks/use-toast";
 import { analyzeStyle, generateMimicText, humanizeText } from "@/utils/analysisUtils";
 import { useLanguage } from "@/context/LanguageContext";
+import { useAuth } from "@/context/AuthContext";
+import { saveGeneratedContent } from "@/utils/workUtils";
 
 const Index = () => {
   const { toast } = useToast();
   const { t } = useLanguage();
+  const { user, isAuthenticated } = useAuth();
   const [step, setStep] = useState(1);
   const [originalText, setOriginalText] = useState("");
   const [styleAnalysis, setStyleAnalysis] = useState(null);
   const [topicKeywords, setTopicKeywords] = useState("");
   const [mimickedText, setMimickedText] = useState("");
   const [humanizedText, setHumanizedText] = useState("");
+  const [title, setTitle] = useState("");
   const [isPaid, setIsPaid] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
@@ -77,6 +81,7 @@ const Index = () => {
       const generatedText = await generateMimicText(styleAnalysis, topicKeywords);
       
       setMimickedText(generatedText);
+      setTitle(topicKeywords.split(',')[0] || "New Work");
       setStep(3);
       toast({
         title: t("toast.generateSuccess"),
@@ -116,6 +121,18 @@ const Index = () => {
         title: t("toast.humanizeSuccess"),
         description: t("toast.humanizeSuccess"),
       });
+
+      // Save the content if user is authenticated
+      if (isAuthenticated && user) {
+        saveGeneratedContent(
+          user.id,
+          title,
+          topicKeywords,
+          originalText,
+          mimickedText,
+          processedText
+        );
+      }
     } catch (error) {
       toast({
         title: t("toast.humanizeFail"),

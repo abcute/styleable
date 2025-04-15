@@ -1,26 +1,36 @@
+
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, Navigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Navbar from "@/components/Navbar";
 import { useLanguage } from "@/context/LanguageContext";
-import { Work, getWorks, toggleFavorite } from '@/data/works';
+import { Work, getWorksByUserId, toggleFavorite } from '@/data/works';
+import { useAuth } from '@/context/AuthContext';
 
 const MyWorks: React.FC = () => {
   const { t, language } = useLanguage();
+  const { user, isAuthenticated } = useAuth();
   const [works, setWorks] = useState<Work[]>([]);
 
   useEffect(() => {
-    setWorks(getWorks());
-  }, []);
+    if (user) {
+      setWorks(getWorksByUserId(user.id));
+    }
+  }, [user]);
 
   const handleToggleFavorite = (id: number) => {
     const updatedWork = toggleFavorite(id);
-    if (updatedWork) {
-      setWorks(getWorks());
+    if (updatedWork && user) {
+      setWorks(getWorksByUserId(user.id));
     }
   };
+
+  // Redirect to login if not authenticated
+  if (!isAuthenticated) {
+    return <Navigate to="/login" />;
+  }
 
   const getLocalizedTitle = (title: string) => {
     if (language === 'en' && /[\u4e00-\u9fa5]/.test(title)) {
@@ -84,13 +94,19 @@ const MyWorks: React.FC = () => {
           </TabsList>
           
           <TabsContent value="all" className="space-y-6">
-            {works.map(renderWorkCard)}
+            {works.length > 0 ? (
+              works.map(renderWorkCard)
+            ) : (
+              <div className="text-center py-12">
+                <p className="text-gray-500">{t("myWorks.noWorks")}</p>
+              </div>
+            )}
           </TabsContent>
           
           <TabsContent value="favorite" className="space-y-6">
-            {works.filter(work => work.favorite).map(renderWorkCard)}
-            
-            {works.filter(work => work.favorite).length === 0 && (
+            {works.filter(work => work.favorite).length > 0 ? (
+              works.filter(work => work.favorite).map(renderWorkCard)
+            ) : (
               <div className="text-center py-12">
                 <p className="text-gray-500">{t("myWorks.noFavorites")}</p>
               </div>

@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
 
 type Language = "en" | "zh";
@@ -9,6 +10,7 @@ type TranslationKeys = {
     works: string;
     login: string;
     register: string;
+    logout: string;
   };
   steps: {
     analyzeOriginal: string;
@@ -29,6 +31,8 @@ type TranslationKeys = {
     narrative: string;
     more: string;
     back: string;
+    collapse: string;
+    expand: string;
   };
   topicInput: {
     title: string;
@@ -90,7 +94,37 @@ type TranslationKeys = {
     humanizedText: string;
     viewFull: string;
     noFavorites: string;
+    noWorks: string;
   };
+  auth: {
+    loginTitle: string;
+    loginDescription: string;
+    registerTitle: string;
+    registerDescription: string;
+    email: string;
+    password: string;
+    confirmPassword: string;
+    name: string;
+    namePlaceholder: string;
+    login: string;
+    register: string;
+    loggingIn: string;
+    registering: string;
+    noAccount: string;
+    haveAccount: string;
+    signUp: string;
+    signIn: string;
+    validationError: string;
+    allFieldsRequired: string;
+    passwordsMismatch: string;
+    loginSuccess: string;
+    loginFailed: string;
+    registerSuccess: string;
+    registerFailed: string;
+    invalidCredentials: string;
+    emailExists: string;
+    unexpectedError: string;
+  }
 };
 
 const translations: Record<Language, TranslationKeys> = {
@@ -101,6 +135,7 @@ const translations: Record<Language, TranslationKeys> = {
       works: "My Works",
       login: "Login",
       register: "Register",
+      logout: "Logout",
     },
     steps: {
       analyzeOriginal: "Analyze Original Style",
@@ -121,6 +156,8 @@ const translations: Record<Language, TranslationKeys> = {
       narrative: "Narrative Features",
       more: "More Features",
       back: "Back to Edit Original",
+      collapse: "Collapse",
+      expand: "Expand",
     },
     topicInput: {
       title: "Step 2: Enter Topic Keywords",
@@ -181,8 +218,38 @@ const translations: Record<Language, TranslationKeys> = {
       mimicText: "Mimic Text",
       humanizedText: "Humanized Text",
       viewFull: "View Full",
-      noFavorites: "No favorite works yet"
-    }
+      noFavorites: "No favorite works yet",
+      noWorks: "You haven't created any works yet",
+    },
+    auth: {
+      loginTitle: "Welcome Back",
+      loginDescription: "Sign in to your account",
+      registerTitle: "Create an Account",
+      registerDescription: "Sign up to get started",
+      email: "Email",
+      password: "Password",
+      confirmPassword: "Confirm Password",
+      name: "Full Name",
+      namePlaceholder: "John Doe",
+      login: "Sign In",
+      register: "Sign Up",
+      loggingIn: "Signing In...",
+      registering: "Creating Account...",
+      noAccount: "Don't have an account?",
+      haveAccount: "Already have an account?",
+      signUp: "Sign Up",
+      signIn: "Sign In",
+      validationError: "Invalid Input",
+      allFieldsRequired: "All fields are required",
+      passwordsMismatch: "Passwords do not match",
+      loginSuccess: "Successfully signed in!",
+      loginFailed: "Login Failed",
+      registerSuccess: "Account created successfully!",
+      registerFailed: "Registration Failed",
+      invalidCredentials: "Invalid email or password",
+      emailExists: "An account with this email already exists",
+      unexpectedError: "An unexpected error occurred",
+    },
   },
   zh: {
     navbar: {
@@ -191,6 +258,7 @@ const translations: Record<Language, TranslationKeys> = {
       works: "我的作品",
       login: "登录",
       register: "注册",
+      logout: "退出登录",
     },
     steps: {
       analyzeOriginal: "分析原文风格",
@@ -211,6 +279,8 @@ const translations: Record<Language, TranslationKeys> = {
       narrative: "叙事特征",
       more: "更多特征",
       back: "返回修改原文",
+      collapse: "收起",
+      expand: "展开",
     },
     topicInput: {
       title: "步骤二：输入主题关键词",
@@ -271,7 +341,37 @@ const translations: Record<Language, TranslationKeys> = {
       mimicText: "仿写片段",
       humanizedText: "人味化片段",
       viewFull: "查看全文",
-      noFavorites: "暂无收藏作品"
+      noFavorites: "暂无收藏作品",
+      noWorks: "您还没有创建任何作品",
+    },
+    auth: {
+      loginTitle: "欢迎回来",
+      loginDescription: "登录您的账户",
+      registerTitle: "创建账户",
+      registerDescription: "注册以开始使用",
+      email: "电子邮箱",
+      password: "密码",
+      confirmPassword: "确认密码",
+      name: "姓名",
+      namePlaceholder: "张三",
+      login: "登录",
+      register: "注册",
+      loggingIn: "登录中...",
+      registering: "注册中...",
+      noAccount: "还没有账户？",
+      haveAccount: "已有账户？",
+      signUp: "注册",
+      signIn: "登录",
+      validationError: "输入无效",
+      allFieldsRequired: "所有字段都是必填的",
+      passwordsMismatch: "两次输入的密码不匹配",
+      loginSuccess: "登录成功！",
+      loginFailed: "登录失败",
+      registerSuccess: "账户创建成功！",
+      registerFailed: "注册失败",
+      invalidCredentials: "邮箱或密码无效",
+      emailExists: "该邮箱已被注册",
+      unexpectedError: "发生了未知错误",
     }
   },
 };

@@ -1,6 +1,7 @@
 
 export interface Work {
   id: number;
+  userId: number;
   title: string;
   keywords: string;
   originalText: string;
@@ -14,6 +15,7 @@ export interface Work {
 export const initialWorks: Work[] = [
   {
     id: 1,
+    userId: 1,
     title: "春日田野",
     keywords: "田野,春天,农耕",
     originalText: "春风拂过田野，麦苗随风摇曳...",
@@ -24,6 +26,7 @@ export const initialWorks: Work[] = [
   },
   {
     id: 2,
+    userId: 1,
     title: "城市夜景",
     keywords: "城市,夜景,灯光",
     originalText: "华灯初上，城市开始了它的不眠之夜...",
@@ -37,6 +40,10 @@ export const initialWorks: Work[] = [
 let works = [...initialWorks];
 
 export const getWorks = () => works;
+
+export const getWorksByUserId = (userId: number) => {
+  return works.filter(work => work.userId === userId);
+};
 
 export const addWork = (work: Omit<Work, "id" | "date" | "favorite">) => {
   const newWork: Work = {
