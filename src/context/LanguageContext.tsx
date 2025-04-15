@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
 
 type Language = "en" | "zh";
@@ -195,7 +194,7 @@ const translations: Record<Language, TranslationKeys> = {
       collapse: "收起",
       expand: "展开",
       back: "返回修改主题",
-      humanize: "增加"人味"",
+      humanize: "增加人味",
       processing: "处理中...",
     },
     finalContent: {
@@ -211,7 +210,7 @@ const translations: Record<Language, TranslationKeys> = {
     payment: {
       title: "解锁完整内容",
       benefits: "您将获得：",
-      benefit1: "完整的"人味"文章内容",
+      benefit1: "完整的人味文章内容",
       benefit2: "一次性下载，无需订阅",
       benefit3: "可复制、下载和分享的权限",
       processing: "处理中...",
