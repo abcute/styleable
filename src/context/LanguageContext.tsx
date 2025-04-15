@@ -77,6 +77,20 @@ type TranslationKeys = {
   footer: {
     copyright: string;
   };
+  myWorks: {
+    title: string;
+    allWorks: string;
+    favoriteWorks: string;
+    favorite: string;
+    favorited: string;
+    keywords: string;
+    date: string;
+    originalText: string;
+    mimicText: string;
+    humanizedText: string;
+    viewFull: string;
+    noFavorites: string;
+  };
 };
 
 const translations: Record<Language, TranslationKeys> = {
@@ -155,6 +169,20 @@ const translations: Record<Language, TranslationKeys> = {
     footer: {
       copyright: "©2025 Styleable.AI All Rights Reserved",
     },
+    myWorks: {
+      title: "My Works",
+      allWorks: "All Works",
+      favoriteWorks: "Favorite Works",
+      favorite: "Favorite",
+      favorited: "Favorited",
+      keywords: "Keywords",
+      date: "Created",
+      originalText: "Original Text",
+      mimicText: "Mimic Text",
+      humanizedText: "Humanized Text",
+      viewFull: "View Full",
+      noFavorites: "No favorite works yet"
+    }
   },
   zh: {
     navbar: {
@@ -231,6 +259,20 @@ const translations: Record<Language, TranslationKeys> = {
     footer: {
       copyright: "©2025 Styleable.AI 保留所有权利",
     },
+    myWorks: {
+      title: "我的作品",
+      allWorks: "全部作品",
+      favoriteWorks: "收藏作品",
+      favorite: "收藏",
+      favorited: "已收藏",
+      keywords: "关键词",
+      date: "创建日期",
+      originalText: "原文片段",
+      mimicText: "仿写片段",
+      humanizedText: "人味化片段",
+      viewFull: "查看全文",
+      noFavorites: "暂无收藏作品"
+    }
   },
 };
 
