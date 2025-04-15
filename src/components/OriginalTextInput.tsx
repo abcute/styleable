@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
 import { ArrowRight, Loader2 } from "lucide-react";
+import { useLanguage } from "@/context/LanguageContext";
 
 interface OriginalTextInputProps {
   value: string;
@@ -12,16 +13,15 @@ interface OriginalTextInputProps {
 }
 
 const OriginalTextInput = ({ value, onChange, onAnalyze, isLoading }: OriginalTextInputProps) => {
+  const { t } = useLanguage();
+  
   return (
     <Card className="p-6">
-      <h2 className="text-xl font-semibold mb-4">步骤一：输入原始文章</h2>
-      <p className="text-gray-600 mb-4">
-        请输入您想要分析的原始文章，系统将提取其写作风格特征。文章越长，分析越准确（建议300字以上）。
-      </p>
+      <h2 className="text-xl font-semibold mb-4">{t("originalText.title")}</h2>
       
       <div className="mb-6">
         <Textarea
-          placeholder="在此粘贴或输入您想要分析风格的文章..."
+          placeholder={t("originalText.placeholder")}
           value={value}
           onChange={(e) => onChange(e.target.value)}
           className="min-h-[300px] mb-4"
@@ -36,11 +36,11 @@ const OriginalTextInput = ({ value, onChange, onAnalyze, isLoading }: OriginalTe
             {isLoading ? (
               <>
                 <Loader2 className="h-4 w-4 animate-spin" />
-                分析中...
+                {t("mimicPreview.processing")}
               </>
             ) : (
               <>
-                提取文章风格 
+                {t("originalText.analyze")}
                 <ArrowRight className="h-4 w-4" />
               </>
             )}

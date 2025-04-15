@@ -5,7 +5,6 @@ import { Card } from "@/components/ui/card";
 import { CreditCard, Lock } from "lucide-react";
 import { useState } from "react";
 import { useLanguage } from "@/context/LanguageContext";
-import { loadStripe } from "@stripe/stripe-js";
 
 interface PaymentModalProps {
   isOpen: boolean;
@@ -103,7 +102,8 @@ const PaymentModal = ({ isOpen, onClose, onSuccess, amount }: PaymentModalProps)
             </Button>
             
             <div className="text-center text-sm text-gray-500 flex items-center justify-center gap-1">
-              <Lock className="h-3 w-3" /> {t("payment.secure")}
+              <Lock className="h-3 w-3" />
+              {t("payment.secure")}
             </div>
           </div>
         </div>
