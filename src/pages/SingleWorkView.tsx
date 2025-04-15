@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useParams, Link, Navigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -7,16 +7,16 @@ import { ArrowLeft, Copy, Check, Star, StarOff } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/context/LanguageContext";
 import { useAuth } from "@/context/AuthContext";
-import { getWorks, toggleFavorite } from "@/data/works";
+import { getWorks, Work, toggleFavorite } from "@/data/works";
 import Navbar from "@/components/Navbar";
 
-const SingleWorkView = () => {
+const SingleWorkView: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const { t, language } = useLanguage();
   const { user, isAuthenticated } = useAuth();
   const { toast } = useToast();
-  const [work, setWork] = useState<any>(null);
-  const [isCopied, setIsCopied] = useState(false);
+  const [work, setWork] = useState<Work | null>(null);
+  const [copiedField, setCopiedField] = useState<string | null>(null);
 
   useEffect(() => {
     if (id) {
@@ -26,12 +26,10 @@ const SingleWorkView = () => {
     }
   }, [id]);
 
-  // Redirect to login if not authenticated
   if (!isAuthenticated) {
     return <Navigate to="/login" />;
   }
 
-  // If work not found or doesn't belong to user
   if (!work || (user && work.userId !== user.id)) {
     return <Navigate to="/my-works" />;
   }
@@ -51,17 +49,17 @@ const SingleWorkView = () => {
     }
   };
 
-  const handleCopyText = async (text: string) => {
+  const handleCopyText = async (text: string, field: string) => {
     try {
       await navigator.clipboard.writeText(text);
-      setIsCopied(true);
+      setCopiedField(field);
       toast({
         title: t("toast.copySuccess"),
         duration: 2000,
       });
       
       setTimeout(() => {
-        setIsCopied(false);
+        setCopiedField(null);
       }, 2000);
     } catch (err) {
       toast({
@@ -78,19 +76,30 @@ const SingleWorkView = () => {
     return title;
   };
 
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString(language === 'en' ? 'en-US' : 'zh-CN', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar />
       
       <main className="container mx-auto px-4 py-8">
+        {/* Header Section */}
         <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-4">
             <Link to="/my-works">
               <Button variant="outline" size="sm">
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 {t("myWorks.backToWorks")}
               </Button>
             </Link>
+            <h1 className="text-2xl font-bold">{getLocalizedTitle(work.title)}</h1>
           </div>
           
           <Button
@@ -112,10 +121,11 @@ const SingleWorkView = () => {
             )}
           </Button>
         </div>
-        
+
+        {/* Work Details */}
         <Card className="mb-8">
           <CardHeader>
-            <CardTitle className="text-2xl">{getLocalizedTitle(work.title)}</CardTitle>
+            <CardTitle>{t("myWorks.workDetails")}</CardTitle>
             <div className="flex flex-wrap gap-2 mt-2">
               {work.keywords.split(',').map((keyword: string, index: number) => (
                 <span key={index} className="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm">
@@ -123,92 +133,96 @@ const SingleWorkView = () => {
                 </span>
               ))}
             </div>
-            <p className="text-gray-500 text-sm mt-2">{work.date}</p>
+            <p className="text-gray-500 text-sm mt-2">{formatDate(work.date)}</p>
           </CardHeader>
         </Card>
-        
+
+        {/* Content Sections */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <Card className="lg:col-span-1">
+          {/* Original Text */}
+          <Card>
             <CardHeader>
               <CardTitle>{t("myWorks.originalText")}</CardTitle>
             </CardHeader>
-            <CardContent className="whitespace-pre-line">
-              <div className="text-gray-700">
-                {work.originalText}
+            <CardContent>
+              <div className="prose prose-sm max-w-none">
+                <p className="whitespace-pre-line">{work.originalText}</p>
               </div>
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => handleCopyText(work.originalText)}
-                className="mt-4 flex items-center gap-1"
+                onClick={() => handleCopyText(work.originalText, 'original')}
+                className="mt-4 w-full flex items-center justify-center gap-1"
               >
-                {isCopied ? (
+                {copiedField === 'original' ? (
                   <>
                     <Check className="h-4 w-4 text-green-500" />
-                    {t("finalContent.copied")}
+                    {t("toast.copied")}
                   </>
                 ) : (
                   <>
                     <Copy className="h-4 w-4" />
-                    {t("finalContent.copyText")}
+                    {t("myWorks.copyText")}
                   </>
                 )}
               </Button>
             </CardContent>
           </Card>
-          
-          <Card className="lg:col-span-1">
+
+          {/* Mimic Text */}
+          <Card>
             <CardHeader>
               <CardTitle>{t("myWorks.mimicText")}</CardTitle>
             </CardHeader>
-            <CardContent className="whitespace-pre-line">
-              <div className="text-gray-700">
-                {work.mimicText}
+            <CardContent>
+              <div className="prose prose-sm max-w-none">
+                <p className="whitespace-pre-line">{work.mimicText}</p>
               </div>
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => handleCopyText(work.mimicText)}
-                className="mt-4 flex items-center gap-1"
+                onClick={() => handleCopyText(work.mimicText, 'mimic')}
+                className="mt-4 w-full flex items-center justify-center gap-1"
               >
-                {isCopied ? (
+                {copiedField === 'mimic' ? (
                   <>
                     <Check className="h-4 w-4 text-green-500" />
-                    {t("finalContent.copied")}
+                    {t("toast.copied")}
                   </>
                 ) : (
                   <>
                     <Copy className="h-4 w-4" />
-                    {t("finalContent.copyText")}
+                    {t("myWorks.copyText")}
                   </>
                 )}
               </Button>
             </CardContent>
           </Card>
-          
-          <Card className="lg:col-span-1">
+
+          {/* Humanized Text */}
+          <Card>
             <CardHeader>
               <CardTitle>{t("myWorks.humanizedText")}</CardTitle>
             </CardHeader>
-            <CardContent className="whitespace-pre-line">
-              <div className="text-gray-700">
-                {work.humanizedText}
+            <CardContent>
+              <div className="prose prose-sm max-w-none">
+                <p className="whitespace-pre-line">{work.humanizedText}</p>
               </div>
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => handleCopyText(work.humanizedText)}
-                className="mt-4 flex items-center gap-1"
+                onClick={() => handleCopyText(work.humanizedText, 'humanized')}
+                className="mt-4 w-full flex items-center justify-center gap-1"
               >
-                {isCopied ? (
+                {copiedField === 'humanized' ? (
                   <>
                     <Check className="h-4 w-4 text-green-500" />
-                    {t("finalContent.copied")}
+                    {t("toast.copied")}
                   </>
                 ) : (
                   <>
                     <Copy className="h-4 w-4" />
-                    {t("finalContent.copyText")}
+                    {t("myWorks.copyText")}
                   </>
                 )}
               </Button>
