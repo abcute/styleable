@@ -5,14 +5,16 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/context/AuthContext";
 import { useLanguage } from "@/context/LanguageContext";
 import Navbar from "@/components/Navbar";
+import GoogleLoginButton from "@/components/GoogleLoginButton";
 
 const Login = () => {
   const { t } = useLanguage();
-  const { login } = useAuth();
+  const { login, googleLogin } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
   
@@ -60,6 +62,43 @@ const Login = () => {
     }
   };
 
+  const handleGoogleSuccess = async (credentialResponse: any) => {
+    setIsLoading(true);
+    
+    try {
+      const success = await googleLogin(credentialResponse);
+      
+      if (success) {
+        toast({
+          title: t("auth.loginSuccess"),
+        });
+        navigate("/");
+      } else {
+        toast({
+          title: t("auth.loginFailed"),
+          description: t("auth.googleLoginError"),
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: t("auth.loginFailed"),
+        description: t("auth.unexpectedError"),
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleGoogleError = () => {
+    toast({
+      title: t("auth.loginFailed"),
+      description: t("auth.googleLoginError"),
+      variant: "destructive",
+    });
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50">
       <Navbar />
@@ -70,6 +109,18 @@ const Login = () => {
             <CardTitle className="text-2xl font-bold">{t("auth.loginTitle")}</CardTitle>
             <CardDescription>{t("auth.loginDescription")}</CardDescription>
           </CardHeader>
+          
+          <GoogleLoginButton 
+            onSuccess={handleGoogleSuccess} 
+            onError={handleGoogleError}
+            className="px-6 py-2"
+          />
+          
+          <div className="px-6 py-4">
+            <Separator>
+              <span className="mx-2 text-xs text-gray-500">{t("auth.orContinueWith")}</span>
+            </Separator>
+          </div>
           
           <form onSubmit={handleSubmit}>
             <CardContent className="space-y-4">
