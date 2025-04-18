@@ -2,7 +2,7 @@
 import { addWork } from "@/data/works";
 
 export const saveGeneratedContent = (
-  userId: number,
+  userId: string,
   title: string,
   keywords: string,
   originalText: string,

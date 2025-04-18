@@ -36,7 +36,7 @@ const SingleWorkView: React.FC = () => {
 
   const handleToggleFavorite = () => {
     if (id) {
-      const updatedWork = toggleFavorite(parseInt(id));
+      const updatedWork = toggleFavorite(id); // Now using id as string directly
       if (updatedWork) {
         setWork(updatedWork);
         toast({

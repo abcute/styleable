@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import StepIndicator from "@/components/StepIndicator";
@@ -44,7 +43,6 @@ const Index = () => {
     
     setIsLoading(true);
     try {
-      // 调用分析函数
       const analysisResult = await analyzeStyle(originalText);
       
       setStyleAnalysis(analysisResult);
@@ -77,7 +75,6 @@ const Index = () => {
     
     setIsLoading(true);
     try {
-      // 调用仿写生成函数
       const generatedText = await generateMimicText(styleAnalysis, topicKeywords);
       
       setMimickedText(generatedText);
@@ -111,7 +108,6 @@ const Index = () => {
     
     setIsLoading(true);
     try {
-      // 调用人味化处理函数
       const processedText = await humanizeText(mimickedText);
       
       setHumanizedText(processedText);
@@ -122,10 +118,9 @@ const Index = () => {
         description: t("toast.humanizeSuccess"),
       });
 
-      // Save the content if user is authenticated
       if (isAuthenticated && user) {
         saveGeneratedContent(
-          user.id,
+          user.id.toString(),
           title,
           topicKeywords,
           originalText,

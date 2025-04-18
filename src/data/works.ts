@@ -1,3 +1,4 @@
+
 export interface Work {
   id: string;
   userId: string;
@@ -29,4 +30,28 @@ export const toggleFavorite = (workId: string) => {
     return works[workIndex];
   }
   return null;
+};
+
+export const addWork = (workData: {
+  userId: string;
+  title: string;
+  keywords?: string;
+  originalText: string;
+  mimicText?: string;
+  humanizedText?: string;
+}) => {
+  const newWork: Work = {
+    id: Date.now().toString(), // Generate a simple string ID
+    userId: workData.userId,
+    title: workData.title,
+    keywords: workData.keywords || '',
+    originalText: workData.originalText,
+    mimicText: workData.mimicText || '',
+    humanizedText: workData.humanizedText || '',
+    favorite: false,
+    date: new Date().toISOString()
+  };
+  
+  works.push(newWork);
+  return newWork;
 };

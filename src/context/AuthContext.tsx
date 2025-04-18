@@ -49,8 +49,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         provider: 'google',
         options: {
           queryParams: {
-            access_token: credentialResponse.credential,
-            id_token: credentialResponse.credential,
+            access_type: 'offline',
+            prompt: 'consent',
           },
         },
       });

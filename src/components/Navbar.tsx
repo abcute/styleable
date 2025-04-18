@@ -1,5 +1,5 @@
 
-import { BookOpen, FileText, LogOut } from "lucide-react";
+import { BookOpen, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import LanguageSwitcher from "./LanguageSwitcher";
@@ -9,6 +9,9 @@ import { useAuth } from "@/context/AuthContext";
 const Navbar = () => {
   const { t } = useLanguage();
   const { user, isAuthenticated, logout } = useAuth();
+  
+  // Get display name from user metadata or email
+  const displayName = user?.user_metadata?.name || user?.user_metadata?.full_name || user?.email || '';
   
   return (
     <header className="bg-white/50 backdrop-blur-md shadow-sm dark:bg-black/30">
@@ -32,7 +35,7 @@ const Navbar = () => {
           {isAuthenticated ? (
             <div className="flex items-center gap-2">
               <span className="text-sm text-gray-600 dark:text-gray-300 hidden md:inline-block">
-                {user?.user_metadata?.name || user?.email}
+                {displayName}
               </span>
               <Button 
                 variant="ghost" 
