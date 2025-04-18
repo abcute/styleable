@@ -1,5 +1,4 @@
 
-import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
@@ -10,28 +9,41 @@ import GoogleLoginButton from "@/components/GoogleLoginButton";
 
 const Login = () => {
   const { t } = useLanguage();
-  const { googleLogin, isAuthenticated } = useAuth();
+  const { googleLogin } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
   
-  // Redirect to home if already authenticated
-  useEffect(() => {
-    if (isAuthenticated) {
-      navigate("/");
-    }
-  }, [isAuthenticated, navigate]);
-
-  const handleGoogleLogin = async () => {
+  const handleGoogleSuccess = async (credentialResponse: any) => {
     try {
-      await googleLogin();
-      // The redirect will happen automatically by Supabase
-    } catch (error: any) {
+      const { error } = await googleLogin(credentialResponse);
+      
+      if (!error) {
+        toast({
+          title: t("auth.loginSuccess"),
+        });
+        navigate("/");
+      } else {
+        toast({
+          title: t("auth.loginFailed"),
+          description: t("auth.googleLoginError"),
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
       toast({
         title: t("auth.loginFailed"),
-        description: error.message || t("auth.googleLoginError"),
+        description: t("auth.unexpectedError"),
         variant: "destructive",
       });
     }
+  };
+
+  const handleGoogleError = () => {
+    toast({
+      title: t("auth.loginFailed"),
+      description: t("auth.googleLoginError"),
+      variant: "destructive",
+    });
   };
 
   return (
@@ -47,7 +59,8 @@ const Login = () => {
           
           <CardContent className="flex justify-center py-8">
             <GoogleLoginButton 
-              onClick={handleGoogleLogin}
+              onSuccess={handleGoogleSuccess} 
+              onError={handleGoogleError}
             />
           </CardContent>
         </Card>
