@@ -16,12 +16,13 @@ const MyWorks: React.FC = () => {
 
   useEffect(() => {
     if (user) {
-      setWorks(getWorksByUserId(user.id));
+      const userWorks = getWorksByUserId(user.id);
+      setWorks(userWorks);
     }
   }, [user]);
 
-  const handleToggleFavorite = (id: number) => {
-    const updatedWork = toggleFavorite(id);
+  const handleToggleFavorite = (workId: string) => {
+    const updatedWork = toggleFavorite(workId);
     if (updatedWork && user) {
       setWorks(getWorksByUserId(user.id));
     }

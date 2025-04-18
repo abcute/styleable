@@ -1,5 +1,5 @@
 
-import { BookOpen, FileText, LogOut, User } from "lucide-react";
+import { BookOpen, FileText, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import LanguageSwitcher from "./LanguageSwitcher";
@@ -32,7 +32,7 @@ const Navbar = () => {
           {isAuthenticated ? (
             <div className="flex items-center gap-2">
               <span className="text-sm text-gray-600 dark:text-gray-300 hidden md:inline-block">
-                {user?.name}
+                {user?.user_metadata?.name || user?.email}
               </span>
               <Button 
                 variant="ghost" 
@@ -45,18 +45,11 @@ const Navbar = () => {
               </Button>
             </div>
           ) : (
-            <>
-              <Link to="/login">
-                <Button variant="ghost" className="text-gray-600 dark:text-gray-300">
-                  {t("navbar.login")}
-                </Button>
-              </Link>
-              <Link to="/register">
-                <Button className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700">
-                  {t("navbar.register")}
-                </Button>
-              </Link>
-            </>
+            <Link to="/login">
+              <Button className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700">
+                {t("navbar.login")}
+              </Button>
+            </Link>
           )}
         </div>
       </div>

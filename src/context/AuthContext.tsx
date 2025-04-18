@@ -6,8 +6,6 @@ import { GoogleOAuthProvider } from "@react-oauth/google";
 
 interface AuthContextType {
   user: User | null;
-  login: (email: string, password: string) => Promise<{ error: Error | null }>;
-  register: (email: string, password: string, name: string) => Promise<{ error: Error | null }>;
   googleLogin: (credentialResponse: any) => Promise<{ error: Error | null }>;
   logout: () => Promise<void>;
   isAuthenticated: boolean;
@@ -45,49 +43,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return () => subscription.unsubscribe();
   }, []);
 
-  const login = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-    return { error };
-  };
-
-  const register = async (email: string, password: string, name: string) => {
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: {
-          name,
-        },
-      },
-    });
-    return { error };
-  };
-
   const googleLogin = async (credentialResponse: any) => {
     try {
-      // Decode the JWT token to get user info
-      const token = credentialResponse.credential;
-      const decodedToken = token ? JSON.parse(atob(token.split('.')[1])) : null;
-      
-      if (!decodedToken || !decodedToken.email) {
-        return { error: new Error("Invalid Google token") };
-      }
-      
-      // Sign in with Google OAuth
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
           queryParams: {
-            access_token: token,
-            id_token: token,
+            access_token: credentialResponse.credential,
+            id_token: credentialResponse.credential,
           },
         },
       });
       
-      return { error };
+      return { error: error as Error | null };
     } catch (error) {
       return { error: error as Error };
     }
@@ -99,7 +67,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   return (
     <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
-      <AuthContext.Provider value={{ user, login, register, googleLogin, logout, isAuthenticated }}>
+      <AuthContext.Provider value={{ user, googleLogin, logout, isAuthenticated }}>
         {children}
       </AuthContext.Provider>
     </GoogleOAuthProvider>

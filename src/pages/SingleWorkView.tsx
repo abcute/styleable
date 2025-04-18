@@ -21,7 +21,7 @@ const SingleWorkView: React.FC = () => {
   useEffect(() => {
     if (id) {
       const allWorks = getWorks();
-      const foundWork = allWorks.find(w => w.id === parseInt(id));
+      const foundWork = allWorks.find(w => w.id === id);
       setWork(foundWork || null);
     }
   }, [id]);
