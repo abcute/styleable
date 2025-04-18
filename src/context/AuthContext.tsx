@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { User, getUserByEmail, authenticateUser, createUser, createOrGetGoogleUser } from "@/data/users";
 import { GoogleOAuthProvider } from "@react-oauth/google";
@@ -22,9 +21,8 @@ export const useAuth = () => {
   return context;
 };
 
-// This would be your actual Google client ID from the Google Cloud Console
-// In production, you should use an environment variable
-const GOOGLE_CLIENT_ID = "YOUR_GOOGLE_CLIENT_ID_HERE";
+// Updated Google Client ID
+const GOOGLE_CLIENT_ID = "722704440292-dtks5klouk2lb9j67beea39gu7p71plo.apps.googleusercontent.com";
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
