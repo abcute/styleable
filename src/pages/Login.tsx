@@ -1,4 +1,5 @@
 
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
@@ -9,41 +10,28 @@ import GoogleLoginButton from "@/components/GoogleLoginButton";
 
 const Login = () => {
   const { t } = useLanguage();
-  const { googleLogin } = useAuth();
+  const { googleLogin, isAuthenticated } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
   
-  const handleGoogleSuccess = async (credentialResponse: any) => {
+  // Redirect to home if already authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate("/");
+    }
+  }, [isAuthenticated, navigate]);
+
+  const handleGoogleLogin = async () => {
     try {
-      const { error } = await googleLogin(credentialResponse);
-      
-      if (!error) {
-        toast({
-          title: t("auth.loginSuccess"),
-        });
-        navigate("/");
-      } else {
-        toast({
-          title: t("auth.loginFailed"),
-          description: t("auth.googleLoginError"),
-          variant: "destructive",
-        });
-      }
-    } catch (error) {
+      await googleLogin();
+      // The redirect will happen automatically by Supabase
+    } catch (error: any) {
       toast({
         title: t("auth.loginFailed"),
-        description: t("auth.unexpectedError"),
+        description: error.message || t("auth.googleLoginError"),
         variant: "destructive",
       });
     }
-  };
-
-  const handleGoogleError = () => {
-    toast({
-      title: t("auth.loginFailed"),
-      description: t("auth.googleLoginError"),
-      variant: "destructive",
-    });
   };
 
   return (
@@ -59,8 +47,7 @@ const Login = () => {
           
           <CardContent className="flex justify-center py-8">
             <GoogleLoginButton 
-              onSuccess={handleGoogleSuccess} 
-              onError={handleGoogleError}
+              onClick={handleGoogleLogin}
             />
           </CardContent>
         </Card>

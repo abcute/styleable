@@ -2,11 +2,10 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
-import { GoogleOAuthProvider } from "@react-oauth/google";
 
 interface AuthContextType {
   user: User | null;
-  googleLogin: (credentialResponse: any) => Promise<{ error: Error | null }>;
+  googleLogin: () => Promise<void>;
   logout: () => Promise<void>;
   isAuthenticated: boolean;
 }
@@ -20,8 +19,6 @@ export const useAuth = () => {
   }
   return context;
 };
-
-const GOOGLE_CLIENT_ID = "722704440292-dtks5klouk2lb9j67beea39gu7p71plo.apps.googleusercontent.com";
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
@@ -43,21 +40,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return () => subscription.unsubscribe();
   }, []);
 
-  const googleLogin = async (credentialResponse: any) => {
-    try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          queryParams: {
-            access_type: 'offline',
-            prompt: 'consent',
-          },
-        },
-      });
-      
-      return { error: error as Error | null };
-    } catch (error) {
-      return { error: error as Error };
+  const googleLogin = async () => {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: window.location.origin + '/register',
+      },
+    });
+    
+    if (error) {
+      console.error("Google login error:", error);
+      throw error;
     }
   };
 
@@ -66,10 +59,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   return (
-    <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
-      <AuthContext.Provider value={{ user, googleLogin, logout, isAuthenticated }}>
-        {children}
-      </AuthContext.Provider>
-    </GoogleOAuthProvider>
+    <AuthContext.Provider value={{ user, googleLogin, logout, isAuthenticated }}>
+      {children}
+    </AuthContext.Provider>
   );
 };

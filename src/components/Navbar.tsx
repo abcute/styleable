@@ -1,4 +1,5 @@
 
+import React from "react";
 import { BookOpen, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
@@ -11,7 +12,10 @@ const Navbar = () => {
   const { user, isAuthenticated, logout } = useAuth();
   
   // Get display name from user metadata or email
-  const displayName = user?.user_metadata?.name || user?.user_metadata?.full_name || user?.email || '';
+  const displayName = user?.user_metadata?.full_name 
+    || user?.user_metadata?.name 
+    || user?.email?.split('@')[0]
+    || '';
   
   return (
     <header className="bg-white/50 backdrop-blur-md shadow-sm dark:bg-black/30">

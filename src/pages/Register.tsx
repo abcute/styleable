@@ -21,37 +21,17 @@ const Register = () => {
     }
   }, [isAuthenticated, navigate]);
 
-  const handleGoogleSuccess = async (credentialResponse: any) => {
+  const handleGoogleLogin = async () => {
     try {
-      const { error } = await googleLogin(credentialResponse);
-      
-      if (!error) {
-        toast({
-          title: t("auth.registerSuccess"),
-        });
-        navigate("/");
-      } else {
-        toast({
-          title: t("auth.registerFailed"),
-          description: t("auth.googleLoginError"),
-          variant: "destructive",
-        });
-      }
-    } catch (error) {
+      await googleLogin();
+      // The redirect will happen automatically by Supabase
+    } catch (error: any) {
       toast({
         title: t("auth.registerFailed"),
-        description: t("auth.unexpectedError"),
+        description: error.message || t("auth.googleLoginError"),
         variant: "destructive",
       });
     }
-  };
-
-  const handleGoogleError = () => {
-    toast({
-      title: t("auth.registerFailed"),
-      description: t("auth.googleLoginError"),
-      variant: "destructive",
-    });
   };
 
   return (
@@ -67,8 +47,7 @@ const Register = () => {
           
           <CardContent className="flex flex-col items-center py-8 space-y-6">
             <GoogleLoginButton 
-              onSuccess={handleGoogleSuccess} 
-              onError={handleGoogleError}
+              onClick={handleGoogleLogin}
             />
             
             <div className="text-center text-sm">
