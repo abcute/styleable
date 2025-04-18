@@ -9,7 +9,107 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          id: string
+          updated_at: string
+          username: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          id: string
+          updated_at?: string
+          username?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          id?: string
+          updated_at?: string
+          username?: string | null
+        }
+        Relationships: []
+      }
+      user_styles: {
+        Row: {
+          created_at: string
+          id: string
+          style_data: Json
+          style_name: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          style_data: Json
+          style_name: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          style_data?: Json
+          style_name?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      works: {
+        Row: {
+          created_at: string
+          favorite: boolean
+          humanized_text: string | null
+          id: string
+          keywords: string | null
+          mimic_text: string | null
+          original_text: string
+          style_id: string | null
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          favorite?: boolean
+          humanized_text?: string | null
+          id?: string
+          keywords?: string | null
+          mimic_text?: string | null
+          original_text: string
+          style_id?: string | null
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          favorite?: boolean
+          humanized_text?: string | null
+          id?: string
+          keywords?: string | null
+          mimic_text?: string | null
+          original_text?: string
+          style_id?: string | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "works_style_id_fkey"
+            columns: ["style_id"]
+            isOneToOne: false
+            referencedRelation: "user_styles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never

@@ -1,13 +1,15 @@
+
 import React, { createContext, useContext, useState, useEffect } from "react";
-import { User, getUserByEmail, authenticateUser, createUser, createOrGetGoogleUser } from "@/data/users";
+import { User } from "@supabase/supabase-js";
+import { supabase } from "@/integrations/supabase/client";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 
 interface AuthContextType {
   user: User | null;
-  login: (email: string, password: string) => Promise<boolean>;
-  register: (email: string, password: string, name: string) => Promise<boolean>;
-  googleLogin: (credentialResponse: any) => Promise<boolean>;
-  logout: () => void;
+  login: (email: string, password: string) => Promise<{ error: Error | null }>;
+  register: (email: string, password: string, name: string) => Promise<{ error: Error | null }>;
+  googleLogin: (credentialResponse: any) => Promise<{ error: Error | null }>;
+  logout: () => Promise<void>;
   isAuthenticated: boolean;
 }
 
@@ -21,7 +23,6 @@ export const useAuth = () => {
   return context;
 };
 
-// Updated Google Client ID
 const GOOGLE_CLIENT_ID = "722704440292-dtks5klouk2lb9j67beea39gu7p71plo.apps.googleusercontent.com";
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -29,106 +30,71 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
-    // Check if user is already logged in (from localStorage)
-    const storedUser = localStorage.getItem("currentUser");
-    if (storedUser) {
-      try {
-        const parsedUser = JSON.parse(storedUser);
-        setUser(parsedUser);
-        setIsAuthenticated(true);
-      } catch (error) {
-        console.error("Failed to parse stored user:", error);
-        localStorage.removeItem("currentUser");
-      }
-    }
+    // Check initial session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+      setIsAuthenticated(!!session?.user);
+    });
+
+    // Set up auth state listener
+    const { data: { subscription }} = supabase.auth.onAuthStateChange((event, session) => {
+      setUser(session?.user ?? null);
+      setIsAuthenticated(!!session?.user);
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
-  const login = async (email: string, password: string): Promise<boolean> => {
-    // Simulate network request
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        const authenticatedUser = authenticateUser(email, password);
-        
-        if (authenticatedUser) {
-          setUser(authenticatedUser);
-          setIsAuthenticated(true);
-          // Store user in localStorage (remember me)
-          localStorage.setItem("currentUser", JSON.stringify(authenticatedUser));
-          resolve(true);
-        } else {
-          resolve(false);
-        }
-      }, 500); // Simulate network delay
+  const login = async (email: string, password: string) => {
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
     });
+    return { error };
   };
 
-  const googleLogin = async (credentialResponse: any): Promise<boolean> => {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        try {
-          // Decode the JWT token to get user info
-          // In a real application, you should verify this token with Google's servers
-          const token = credentialResponse.credential;
-          const decodedToken = token ? JSON.parse(atob(token.split('.')[1])) : null;
-          
-          if (!decodedToken || !decodedToken.email) {
-            console.error("Invalid Google token");
-            resolve(false);
-            return;
-          }
-          
-          // Extract user information from the token
-          const { email, name, picture, sub: googleId } = decodedToken;
-          
-          // Create or get a user from our system
-          const googleUser = createOrGetGoogleUser({
-            email,
-            name,
-            googleId,
-            picture
-          });
-          
-          if (googleUser) {
-            setUser(googleUser);
-            setIsAuthenticated(true);
-            localStorage.setItem("currentUser", JSON.stringify(googleUser));
-            resolve(true);
-          } else {
-            resolve(false);
-          }
-        } catch (error) {
-          console.error("Google login error:", error);
-          resolve(false);
-        }
-      }, 500); // Simulate network delay
+  const register = async (email: string, password: string, name: string) => {
+    const { error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          name,
+        },
+      },
     });
+    return { error };
   };
 
-  const register = async (email: string, password: string, name: string): Promise<boolean> => {
-    // Simulate network request
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        // Check if email already exists
-        const existingUser = getUserByEmail(email);
-        
-        if (existingUser) {
-          resolve(false);
-        } else {
-          const newUser = createUser({ email, password, name });
-          setUser(newUser);
-          setIsAuthenticated(true);
-          // Store user in localStorage (remember me)
-          localStorage.setItem("currentUser", JSON.stringify(newUser));
-          resolve(true);
-        }
-      }, 500); // Simulate network delay
-    });
+  const googleLogin = async (credentialResponse: any) => {
+    try {
+      // Decode the JWT token to get user info
+      const token = credentialResponse.credential;
+      const decodedToken = token ? JSON.parse(atob(token.split('.')[1])) : null;
+      
+      if (!decodedToken || !decodedToken.email) {
+        return { error: new Error("Invalid Google token") };
+      }
+      
+      // Sign in with Google OAuth
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          queryParams: {
+            access_token: token,
+            id_token: token,
+          },
+        },
+      });
+      
+      return { error };
+    } catch (error) {
+      return { error: error as Error };
+    }
   };
 
-  const logout = () => {
-    setUser(null);
-    setIsAuthenticated(false);
-    localStorage.removeItem("currentUser");
+  const logout = async () => {
+    await supabase.auth.signOut();
   };
 
   return (
