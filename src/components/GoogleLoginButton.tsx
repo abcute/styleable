@@ -26,7 +26,7 @@ const GoogleLoginButton: React.FC<GoogleLoginButtonProps> = ({
         theme="outline"
         shape="rectangular"
         text="signin_with"
-        locale={t("language.code")}
+        locale="en"
         width="300"
       />
     </div>
