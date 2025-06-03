@@ -1,20 +1,22 @@
 
-import { addWork } from "@/data/works";
+import { saveWork } from "@/utils/supabaseUtils";
 
-export const saveGeneratedContent = (
+export const saveGeneratedContent = async (
   userId: string,
   title: string,
   keywords: string,
   originalText: string,
   mimicText: string,
-  humanizedText: string = ""
+  humanizedText: string = "",
+  styleId?: string
 ) => {
-  return addWork({
+  return await saveWork(
     userId,
     title,
     keywords,
     originalText,
     mimicText,
-    humanizedText
-  });
+    humanizedText,
+    styleId
+  );
 };

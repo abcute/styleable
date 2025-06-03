@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import StepIndicator from "@/components/StepIndicator";
@@ -7,6 +8,7 @@ import TopicInput from "@/components/TopicInput";
 import MimicPreview from "@/components/MimicPreview";
 import FinalContent from "@/components/FinalContent";
 import PaymentModal from "@/components/PaymentModal";
+import SavedStylesSelector from "@/components/SavedStylesSelector";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { ArrowRight, FileText, Sparkles, Edit3, CreditCard } from "lucide-react";
@@ -15,6 +17,7 @@ import { analyzeStyle, generateMimicText, humanizeText } from "@/utils/analysisU
 import { useLanguage } from "@/context/LanguageContext";
 import { useAuth } from "@/context/AuthContext";
 import { saveGeneratedContent } from "@/utils/workUtils";
+import { saveStyleAnalysis } from "@/utils/supabaseUtils";
 
 const Index = () => {
   const { toast } = useToast();
@@ -23,6 +26,7 @@ const Index = () => {
   const [step, setStep] = useState(1);
   const [originalText, setOriginalText] = useState("");
   const [styleAnalysis, setStyleAnalysis] = useState(null);
+  const [currentStyleId, setCurrentStyleId] = useState<string | null>(null);
   const [topicKeywords, setTopicKeywords] = useState("");
   const [mimickedText, setMimickedText] = useState("");
   const [humanizedText, setHumanizedText] = useState("");
@@ -47,10 +51,34 @@ const Index = () => {
       
       setStyleAnalysis(analysisResult);
       setStep(2);
-      toast({
-        title: t("toast.analyzeSuccess"),
-        description: t("styleAnalysis.title"),
-      });
+      
+      // Save style analysis to database if user is logged in
+      if (isAuthenticated && user && analysisResult) {
+        try {
+          const styleName = `风格分析 - ${new Date().toLocaleDateString('zh-CN')}`;
+          const savedStyle = await saveStyleAnalysis(
+            user.id,
+            styleName,
+            analysisResult
+          );
+          setCurrentStyleId(savedStyle.id);
+          toast({
+            title: "风格分析完成",
+            description: "分析结果已保存，您可以在下次直接使用此风格",
+          });
+        } catch (error) {
+          console.error('Error saving style:', error);
+          toast({
+            title: t("toast.analyzeSuccess"),
+            description: t("styleAnalysis.title"),
+          });
+        }
+      } else {
+        toast({
+          title: t("toast.analyzeSuccess"),
+          description: t("styleAnalysis.title"),
+        });
+      }
     } catch (error) {
       toast({
         title: t("toast.analyzeFail"),
@@ -61,6 +89,16 @@ const Index = () => {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleStyleSelect = (styleData: any, styleName: string) => {
+    setStyleAnalysis(styleData);
+    setStep(2);
+    setOriginalText(""); // Clear original text since we're using saved style
+    toast({
+      title: "风格已加载",
+      description: `已加载风格：${styleName}`,
+    });
   };
 
   const generateMimicTextHandler = async () => {
@@ -119,14 +157,23 @@ const Index = () => {
       });
 
       if (isAuthenticated && user) {
-        saveGeneratedContent(
-          user.id.toString(),
-          title,
-          topicKeywords,
-          originalText,
-          mimickedText,
-          processedText
-        );
+        try {
+          await saveGeneratedContent(
+            user.id,
+            title,
+            topicKeywords,
+            originalText,
+            mimickedText,
+            processedText,
+            currentStyleId || undefined
+          );
+          toast({
+            title: "作品已保存",
+            description: "您可以在"我的作品"页面查看",
+          });
+        } catch (error) {
+          console.error('Error saving work:', error);
+        }
       }
     } catch (error) {
       toast({
@@ -170,12 +217,18 @@ const Index = () => {
         
         <div className="mt-8">
           {step === 1 && (
-            <OriginalTextInput 
-              value={originalText} 
-              onChange={setOriginalText} 
-              onAnalyze={handleAnalyzeStyle}
-              isLoading={isLoading}
-            />
+            <div className="space-y-6">
+              <SavedStylesSelector 
+                onStyleSelect={handleStyleSelect}
+                className="mb-6"
+              />
+              <OriginalTextInput 
+                value={originalText} 
+                onChange={setOriginalText} 
+                onAnalyze={handleAnalyzeStyle}
+                isLoading={isLoading}
+              />
+            </div>
           )}
           
           {step >= 2 && styleAnalysis && (

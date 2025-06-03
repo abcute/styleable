@@ -7,8 +7,22 @@ import { ArrowLeft, Copy, Check, Star, StarOff } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/context/LanguageContext";
 import { useAuth } from "@/context/AuthContext";
-import { getWorks, Work, toggleFavorite } from "@/data/works";
+import { getWorkById, toggleWorkFavorite } from "@/utils/supabaseUtils";
 import Navbar from "@/components/Navbar";
+
+interface Work {
+  id: string;
+  user_id: string;
+  title: string;
+  keywords: string | null;
+  original_text: string;
+  mimic_text: string | null;
+  humanized_text: string | null;
+  favorite: boolean;
+  created_at: string;
+  updated_at: string;
+  style_id: string | null;
+}
 
 const SingleWorkView: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -17,35 +31,71 @@ const SingleWorkView: React.FC = () => {
   const { toast } = useToast();
   const [work, setWork] = useState<Work | null>(null);
   const [copiedField, setCopiedField] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    if (id) {
-      const allWorks = getWorks();
-      const foundWork = allWorks.find(w => w.id === id);
-      setWork(foundWork || null);
+    if (id && user) {
+      loadWork();
     }
-  }, [id]);
+  }, [id, user]);
+
+  const loadWork = async () => {
+    if (!id) return;
+    
+    setIsLoading(true);
+    try {
+      const workData = await getWorkById(id);
+      setWork(workData);
+    } catch (error) {
+      console.error('Error loading work:', error);
+      toast({
+        title: "加载失败",
+        description: "无法加载作品详情",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   if (!isAuthenticated) {
     return <Navigate to="/login" />;
   }
 
-  if (!work || (user && work.userId !== user.id)) {
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Navbar />
+        <main className="container mx-auto px-4 py-8">
+          <p className="text-center">加载中...</p>
+        </main>
+      </div>
+    );
+  }
+
+  if (!work || (user && work.user_id !== user.id)) {
     return <Navigate to="/my-works" />;
   }
 
-  const handleToggleFavorite = () => {
-    if (id) {
-      const updatedWork = toggleFavorite(id); // Now using id as string directly
-      if (updatedWork) {
-        setWork(updatedWork);
-        toast({
-          title: updatedWork.favorite ? 
-            t("myWorks.addedToFavorites") : 
-            t("myWorks.removedFromFavorites"),
-          duration: 2000
-        });
-      }
+  const handleToggleFavorite = async () => {
+    if (!id) return;
+    
+    try {
+      const updatedWork = await toggleWorkFavorite(id, !work.favorite);
+      setWork({ ...work, favorite: updatedWork.favorite });
+      toast({
+        title: updatedWork.favorite ? 
+          t("myWorks.addedToFavorites") : 
+          t("myWorks.removedFromFavorites"),
+        duration: 2000
+      });
+    } catch (error) {
+      console.error('Error toggling favorite:', error);
+      toast({
+        title: "操作失败",
+        description: "无法更新收藏状态",
+        variant: "destructive",
+      });
     }
   };
 
@@ -126,14 +176,16 @@ const SingleWorkView: React.FC = () => {
         <Card className="mb-8">
           <CardHeader>
             <CardTitle>{t("myWorks.workDetails")}</CardTitle>
-            <div className="flex flex-wrap gap-2 mt-2">
-              {work.keywords.split(',').map((keyword: string, index: number) => (
-                <span key={index} className="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm">
-                  {keyword.trim()}
-                </span>
-              ))}
-            </div>
-            <p className="text-gray-500 text-sm mt-2">{formatDate(work.date)}</p>
+            {work.keywords && (
+              <div className="flex flex-wrap gap-2 mt-2">
+                {work.keywords.split(',').map((keyword: string, index: number) => (
+                  <span key={index} className="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm">
+                    {keyword.trim()}
+                  </span>
+                ))}
+              </div>
+            )}
+            <p className="text-gray-500 text-sm mt-2">{formatDate(work.created_at)}</p>
           </CardHeader>
         </Card>
 
@@ -146,12 +198,12 @@ const SingleWorkView: React.FC = () => {
             </CardHeader>
             <CardContent>
               <div className="prose prose-sm max-w-none">
-                <p className="whitespace-pre-line">{work.originalText}</p>
+                <p className="whitespace-pre-line">{work.original_text}</p>
               </div>
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => handleCopyText(work.originalText, 'original')}
+                onClick={() => handleCopyText(work.original_text, 'original')}
                 className="mt-4 w-full flex items-center justify-center gap-1"
               >
                 {copiedField === 'original' ? (
@@ -170,64 +222,68 @@ const SingleWorkView: React.FC = () => {
           </Card>
 
           {/* Mimic Text */}
-          <Card>
-            <CardHeader>
-              <CardTitle>{t("myWorks.mimicText")}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="prose prose-sm max-w-none">
-                <p className="whitespace-pre-line">{work.mimicText}</p>
-              </div>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => handleCopyText(work.mimicText, 'mimic')}
-                className="mt-4 w-full flex items-center justify-center gap-1"
-              >
-                {copiedField === 'mimic' ? (
-                  <>
-                    <Check className="h-4 w-4 text-green-500" />
-                    {t("toast.copied")}
-                  </>
-                ) : (
-                  <>
-                    <Copy className="h-4 w-4" />
-                    {t("myWorks.copyText")}
-                  </>
-                )}
-              </Button>
-            </CardContent>
-          </Card>
+          {work.mimic_text && (
+            <Card>
+              <CardHeader>
+                <CardTitle>{t("myWorks.mimicText")}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="prose prose-sm max-w-none">
+                  <p className="whitespace-pre-line">{work.mimic_text}</p>
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleCopyText(work.mimic_text!, 'mimic')}
+                  className="mt-4 w-full flex items-center justify-center gap-1"
+                >
+                  {copiedField === 'mimic' ? (
+                    <>
+                      <Check className="h-4 w-4 text-green-500" />
+                      {t("toast.copied")}
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="h-4 w-4" />
+                      {t("myWorks.copyText")}
+                    </>
+                  )}
+                </Button>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Humanized Text */}
-          <Card>
-            <CardHeader>
-              <CardTitle>{t("myWorks.humanizedText")}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="prose prose-sm max-w-none">
-                <p className="whitespace-pre-line">{work.humanizedText}</p>
-              </div>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => handleCopyText(work.humanizedText, 'humanized')}
-                className="mt-4 w-full flex items-center justify-center gap-1"
-              >
-                {copiedField === 'humanized' ? (
-                  <>
-                    <Check className="h-4 w-4 text-green-500" />
-                    {t("toast.copied")}
-                  </>
-                ) : (
-                  <>
-                    <Copy className="h-4 w-4" />
-                    {t("myWorks.copyText")}
-                  </>
-                )}
-              </Button>
-            </CardContent>
-          </Card>
+          {work.humanized_text && (
+            <Card>
+              <CardHeader>
+                <CardTitle>{t("myWorks.humanizedText")}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="prose prose-sm max-w-none">
+                  <p className="whitespace-pre-line">{work.humanized_text}</p>
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleCopyText(work.humanized_text!, 'humanized')}
+                  className="mt-4 w-full flex items-center justify-center gap-1"
+                >
+                  {copiedField === 'humanized' ? (
+                    <>
+                      <Check className="h-4 w-4 text-green-500" />
+                      {t("toast.copied")}
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="h-4 w-4" />
+                      {t("myWorks.copyText")}
+                    </>
+                  )}
+                </Button>
+              </CardContent>
+            </Card>
+          )}
         </div>
       </main>
     </div>
