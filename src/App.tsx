@@ -4,7 +4,6 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { useState } from "react";
 import Index from "./pages/Index";
 import MyWorks from "./pages/MyWorks";
 import NotFound from "./pages/NotFound";
@@ -15,10 +14,10 @@ import SingleWorkView from "./pages/SingleWorkView";
 import { LanguageProvider } from "./context/LanguageContext";
 import { AuthProvider } from "./context/AuthContext";
 
-const App = () => {
-  // Create a new QueryClient instance inside the component function
-  const [queryClient] = useState(() => new QueryClient());
+// Create QueryClient instance outside of component to avoid hook issues
+const queryClient = new QueryClient();
 
+const App = () => {
   return (
     <QueryClientProvider client={queryClient}>
       <LanguageProvider>
