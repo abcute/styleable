@@ -1,5 +1,5 @@
 
-import { BookOpen, LogOut } from "lucide-react";
+import { BookOpen, LogOut, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import LanguageSwitcher from "./LanguageSwitcher";
@@ -26,6 +26,10 @@ const Navbar = () => {
         <div className="flex items-center gap-4">
           <nav className="hidden md:flex items-center gap-6">
             <Link to="/" className="text-gray-600 hover:text-indigo-600 transition-colors dark:text-gray-300 dark:hover:text-indigo-400">{t("navbar.home")}</Link>
+            <Link to="/ai-detector" className="text-gray-600 hover:text-indigo-600 transition-colors dark:text-gray-300 dark:hover:text-indigo-400 flex items-center gap-1">
+              <Search className="h-4 w-4" />
+              AI检测器
+            </Link>
             <Link to="/guide" className="text-gray-600 hover:text-indigo-600 transition-colors dark:text-gray-300 dark:hover:text-indigo-400">{t("navbar.guide")}</Link>
             <Link to="/my-works" className="text-gray-600 hover:text-indigo-600 transition-colors dark:text-gray-300 dark:hover:text-indigo-400">{t("navbar.works")}</Link>
           </nav>

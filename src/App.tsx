@@ -11,6 +11,7 @@ import Guide from "./pages/Guide";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import SingleWorkView from "./pages/SingleWorkView";
+import AIDetector from "./pages/AIDetector";
 import { LanguageProvider } from "./context/LanguageContext";
 import { AuthProvider } from "./context/AuthContext";
 
@@ -33,6 +34,7 @@ const App = () => {
                 <Route path="/guide" element={<Guide />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
+                <Route path="/ai-detector" element={<AIDetector />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
