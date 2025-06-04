@@ -10,6 +10,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { useToast } from "@/hooks/use-toast";
 import { detectAIContent } from "@/utils/aiDetectorUtils";
+import { useLanguage } from "@/context/LanguageContext";
 
 interface DetectionResult {
   verdict: {
@@ -42,6 +43,7 @@ interface DetectionResult {
 
 const AIDetector = () => {
   const { toast } = useToast();
+  const { t } = useLanguage();
   const [inputText, setInputText] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState<DetectionResult | null>(null);
@@ -49,8 +51,8 @@ const AIDetector = () => {
   const handleDetection = async () => {
     if (!inputText.trim()) {
       toast({
-        title: "请输入文本",
-        description: "请输入需要检测的文本内容",
+        title: t("aiDetector.inputTextRequired"),
+        description: t("aiDetector.inputTextRequiredDesc"),
         variant: "destructive",
       });
       return;
@@ -58,8 +60,8 @@ const AIDetector = () => {
 
     if (inputText.trim().length < 50) {
       toast({
-        title: "文本过短",
-        description: "为了确保检测准确性，请输入至少50个字符的文本",
+        title: t("aiDetector.textTooShort"),
+        description: t("aiDetector.textTooShortDesc"),
         variant: "destructive",
       });
       return;
@@ -70,14 +72,14 @@ const AIDetector = () => {
       const detectionResult = await detectAIContent(inputText);
       setResult(detectionResult);
       toast({
-        title: "检测完成",
-        description: "AI内容检测已完成",
+        title: t("aiDetector.detectionComplete"),
+        description: t("aiDetector.detectionCompleteDesc"),
       });
     } catch (error) {
       console.error("AI detection error:", error);
       toast({
-        title: "检测失败",
-        description: "AI检测过程中出现错误，请稍后重试",
+        title: t("aiDetector.detectionFailed"),
+        description: t("aiDetector.detectionFailedDesc"),
         variant: "destructive",
       });
     } finally {
@@ -113,10 +115,10 @@ const AIDetector = () => {
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-8">
             <h1 className="text-4xl font-bold mb-4 bg-gradient-to-r from-indigo-600 via-purple-500 to-pink-500 text-transparent bg-clip-text">
-              AI 内容检测器
+              {t("aiDetector.title")}
             </h1>
             <p className="text-gray-600 dark:text-gray-300 text-lg">
-              使用先进的机器学习算法检测文本是否由AI生成
+              {t("aiDetector.description")}
             </p>
           </div>
 
@@ -124,29 +126,29 @@ const AIDetector = () => {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Search className="h-5 w-5" />
-                文本检测
+                {t("aiDetector.inputTitle")}
               </CardTitle>
               <CardDescription>
-                输入需要检测的文本内容，我们将分析其由AI生成的概率
+                {t("aiDetector.inputDescription")}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <Textarea
-                placeholder="请输入需要检测的文本内容（至少50个字符）..."
+                placeholder={t("aiDetector.placeholder")}
                 value={inputText}
                 onChange={(e) => setInputText(e.target.value)}
                 className="min-h-[200px] resize-none"
               />
               <div className="flex justify-between items-center">
                 <span className="text-sm text-gray-500">
-                  {inputText.length} 字符
+                  {inputText.length} {t("aiDetector.characterCount")}
                 </span>
                 <Button 
                   onClick={handleDetection}
                   disabled={isLoading || !inputText.trim()}
                   className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700"
                 >
-                  {isLoading ? "检测中..." : "开始检测"}
+                  {isLoading ? t("aiDetector.detecting") : t("aiDetector.startDetection")}
                 </Button>
               </div>
             </CardContent>
@@ -157,13 +159,13 @@ const AIDetector = () => {
               {/* 检测结果概览 */}
               <Card>
                 <CardHeader>
-                  <CardTitle>检测结果</CardTitle>
+                  <CardTitle>{t("aiDetector.results")}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                       <div className="mb-2">
-                        <span className="text-sm font-medium">AI生成概率</span>
+                        <span className="text-sm font-medium">{t("aiDetector.aiProbability")}</span>
                       </div>
                       <div className="flex items-center gap-3">
                         <Progress 
@@ -177,7 +179,7 @@ const AIDetector = () => {
                     </div>
                     <div>
                       <div className="mb-2">
-                        <span className="text-sm font-medium">置信度等级</span>
+                        <span className="text-sm font-medium">{t("aiDetector.confidenceLevel")}</span>
                       </div>
                       <Badge className={`${getConfidenceColor(result.verdict.confidence_band)} text-white`}>
                         {result.verdict.confidence_band}
@@ -190,12 +192,12 @@ const AIDetector = () => {
               {/* 法证证据 */}
               <Card>
                 <CardHeader>
-                  <CardTitle>法证证据分析</CardTitle>
+                  <CardTitle>{t("aiDetector.forensicEvidence")}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
                     <div>
-                      <h4 className="font-medium mb-3">主要指标</h4>
+                      <h4 className="font-medium mb-3">{t("aiDetector.primaryIndicators")}</h4>
                       <div className="space-y-2">
                         {result.forensic_evidence.primary_indicators.map((indicator, index) => (
                           <div key={index} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
@@ -205,7 +207,7 @@ const AIDetector = () => {
                             </div>
                             <div className="text-right">
                               <div className="text-sm text-gray-600 dark:text-gray-300">
-                                当前值: {indicator.value} | 基线: {indicator.baseline}
+                                {t("aiDetector.currentValue")}: {indicator.value} | {t("aiDetector.baseline")}: {indicator.baseline}
                               </div>
                               <Badge variant={indicator.severity.toLowerCase() === 'high' ? 'destructive' : 'secondary'}>
                                 {indicator.severity}
@@ -217,14 +219,14 @@ const AIDetector = () => {
                     </div>
 
                     <div>
-                      <h4 className="font-medium mb-3">模型特征匹配</h4>
+                      <h4 className="font-medium mb-3">{t("aiDetector.modelSignature")}</h4>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-                          <div className="text-sm text-gray-600 dark:text-gray-300">主要候选</div>
+                          <div className="text-sm text-gray-600 dark:text-gray-300">{t("aiDetector.topCandidate")}</div>
                           <div className="font-medium">{result.forensic_evidence.model_signature.top_candidate}</div>
                         </div>
                         <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div className="text-sm text-gray-600 dark:text-gray-300">备选候选</div>
+                          <div className="text-sm text-gray-600 dark:text-gray-300">{t("aiDetector.alternative")}</div>
                           <div className="font-medium">{result.forensic_evidence.model_signature.alternative}</div>
                         </div>
                       </div>
@@ -236,9 +238,9 @@ const AIDetector = () => {
               {/* 分段分析 */}
               <Card>
                 <CardHeader>
-                  <CardTitle>分段分析</CardTitle>
+                  <CardTitle>{t("aiDetector.segmentAnalysis")}</CardTitle>
                   <CardDescription>
-                    对文本不同片段的详细分析结果
+                    {t("aiDetector.segmentAnalysisDesc")}
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -247,10 +249,10 @@ const AIDetector = () => {
                       <div key={index} className="border rounded-lg p-4">
                         <div className="flex justify-between items-start mb-2">
                           <div className="text-sm text-gray-600 dark:text-gray-300">
-                            位置: {segment.offset}
+                            {t("aiDetector.position")}: {segment.offset}
                           </div>
                           <Badge variant={segment.anomaly_score > 0.7 ? 'destructive' : segment.anomaly_score > 0.4 ? 'default' : 'secondary'}>
-                            异常分数: {(segment.anomaly_score * 100).toFixed(1)}%
+                            {t("aiDetector.anomalyScore")}: {(segment.anomaly_score * 100).toFixed(1)}%
                           </Badge>
                         </div>
                         <div className="mb-3 p-3 bg-gray-50 dark:bg-gray-800 rounded italic">
@@ -272,13 +274,13 @@ const AIDetector = () => {
               {/* 鲁棒性报告 */}
               <Card>
                 <CardHeader>
-                  <CardTitle>鲁棒性报告</CardTitle>
+                  <CardTitle>{t("aiDetector.robustnessReport")}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                       <div className="mb-2">
-                        <span className="text-sm font-medium">对抗攻击抵抗分数</span>
+                        <span className="text-sm font-medium">{t("aiDetector.adversarialScore")}</span>
                       </div>
                       <div className="flex items-center gap-3">
                         <Progress value={result.robustness_report.adversarial_score} className="flex-1" />
@@ -289,7 +291,7 @@ const AIDetector = () => {
                     </div>
                     <div>
                       <div className="mb-2">
-                        <span className="text-sm font-medium">检测到的操作手法</span>
+                        <span className="text-sm font-medium">{t("aiDetector.detectedManipulations")}</span>
                       </div>
                       <div className="flex flex-wrap gap-2">
                         {result.robustness_report.detected_manipulations.length > 0 ? (
@@ -299,7 +301,7 @@ const AIDetector = () => {
                             </Badge>
                           ))
                         ) : (
-                          <span className="text-sm text-gray-500">未检测到操作手法</span>
+                          <span className="text-sm text-gray-500">{t("aiDetector.noManipulations")}</span>
                         )}
                       </div>
                     </div>

@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import StepIndicator from "@/components/StepIndicator";
@@ -202,7 +201,7 @@ const Index = () => {
       
       <main className="container mx-auto px-4 py-8 flex-1">
         <h1 className="text-4xl font-bold text-center mb-8 bg-gradient-to-r from-indigo-600 via-purple-500 to-pink-500 text-transparent bg-clip-text animate-gradient">
-          Styleable
+          {t("navbar.home") === "Home" ? "AI Article Rewriting" : "AI文章仿写"}
         </h1>
         
         <StepIndicator 

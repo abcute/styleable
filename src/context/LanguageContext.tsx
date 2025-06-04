@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
 
 type Language = "en" | "zh";
@@ -11,6 +10,7 @@ type TranslationKeys = {
     login: string;
     register: string;
     logout: string;
+    aiDetector: string;
   };
   steps: {
     analyzeOriginal: string;
@@ -130,12 +130,13 @@ type TranslationKeys = {
 const translations: Record<Language, TranslationKeys> = {
   en: {
     navbar: {
-      home: "Home",
+      home: "AI Article Rewriting",
       guide: "User Guide",
       works: "My Works",
       login: "Login",
       register: "Register",
       logout: "Logout",
+      aiDetector: "AI Detector",
     },
     steps: {
       analyzeOriginal: "Analyze Original Style",
@@ -253,12 +254,13 @@ const translations: Record<Language, TranslationKeys> = {
   },
   zh: {
     navbar: {
-      home: "首页",
+      home: "AI文章仿写",
       guide: "使用指南",
       works: "我的作品",
       login: "登录",
       register: "注册",
       logout: "退出登录",
+      aiDetector: "AI检测器",
     },
     steps: {
       analyzeOriginal: "分析原文风格",
