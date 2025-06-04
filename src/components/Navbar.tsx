@@ -19,7 +19,7 @@ const Navbar = () => {
         <div className="flex items-center gap-2">
           <BookOpen className="h-6 w-6 text-indigo-600" />
           <Link to="/" className="font-bold text-xl text-transparent bg-gradient-to-r from-indigo-600 via-purple-500 to-pink-500 bg-clip-text">
-            {t("navbar.home")}
+            Styleable
           </Link>
         </div>
         
